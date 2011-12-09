@@ -130,9 +130,9 @@ module Metar
     end
     
     def all
-      Metar::Report::KNOWN_ATTRIBUTES.reduce([]) do |memo, key|
+      Metar::Report::KNOWN_ATTRIBUTES.reduce({}) do |memo, key|
         value = self.send(key).to_s
-        memo << {:attribute => key, :value => value} if not value.empty?
+        memo[key] = value unless value.empty?
         memo
       end
     end
