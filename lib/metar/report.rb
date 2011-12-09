@@ -128,6 +128,14 @@ module Metar
         memo
       end
     end
+    
+    def all
+      Metar::Report::KNOWN_ATTRIBUTES.reduce([]) do |memo, key|
+        value = self.send(key).to_s
+        memo << {:attribute => key, :value => value} if not value.empty?
+        memo
+      end
+    end
 
     def to_s
       attributes.collect do |attribute|
