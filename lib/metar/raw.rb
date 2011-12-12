@@ -25,8 +25,13 @@ module Metar
 
       def fetch( cccc )
         s = ''
-        connection.retrbinary( "RETR #{ cccc }.TXT", 1024 ) do | chunk |
-          s << chunk
+        fetcher = lambda { connection.retrbinary( "RETR #{ cccc }.TXT", 1024 ) { | chunk | s << chunk } }
+        
+        begin
+          fetcher.call()
+        rescue
+          @@connection = nil
+          fetcher.call()
         end
         s
       end
