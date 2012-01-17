@@ -120,8 +120,16 @@ module Metar
 
       @structures = nil
 
+      def proxy
+        ENV["http_proxy"] || ENV["all_proxy"]
+      end
+
       def download_stations
-        open(NOAA_STATION_LIST_URL) { |fil| fil.read }
+        if self.proxy
+          open(NOAA_STATION_LIST_URL, :proxy => self.proxy) { |fil| fil.read }
+        else
+          open(NOAA_STATION_LIST_URL) { |fil| fil.read }
+        end
       end
 
       # Path for saving a local copy of the nsc_cccc station list

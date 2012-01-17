@@ -1,39 +1,22 @@
 require 'rubygems' if RUBY_VERSION < '1.9'
-require 'net/ftp'
+require 'open-uri'
 
 module Metar
 
   class Raw
 
-    @@connection = nil
-
     class << self
 
-
-      def cache_connection
-        @@connection = connection
+      def proxy
+        ENV["ftp_proxy"] || ENV["all_proxy"]
       end
 
-      def connection
-        return @@connection if @@connection
-        @@connection = Net::FTP.new('tgftp.nws.noaa.gov')
-        @@connection.login
-        @@connection.chdir('data/observations/metar/stations')
-        @@connection.passive = true
-        @@connection
-      end
-
-      def fetch( cccc )
-        s = ''
-        fetcher = lambda { connection.retrbinary( "RETR #{ cccc }.TXT", 1024 ) { | chunk | s << chunk } }
-        
-        begin
-          fetcher.call()
-        rescue
-          @@connection = nil
-          fetcher.call()
+      def fetch(cccc)
+        if self.proxy
+          open("ftp://tgftp.nws.noaa.gov/data/observations/metar/stations/#{cccc}.TXT", :proxy => self.proxy).read()
+        else
+          open("ftp://tgftp.nws.noaa.gov/data/observations/metar/stations/#{cccc}.TXT").read()
         end
-        s
       end
 
     end
